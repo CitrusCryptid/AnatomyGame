@@ -1,0 +1,65 @@
+/*
+ * Global dark theme and formatting foundation.
+ * Page-specific stylesheets load after this file and can replace these defaults.
+ */
+
+/* Camiro display face used by global headings and the sidebar. */
+@font-face {
+  font-family: 'Camiro.ttf';
+  src: url('https://cdn.jsdelivr.net/gh/baechu-rpg/treeoflife@9f2541925e9650e1640e261ee7385f0ace465ac3/Camiro.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Shared dark palette and type defaults available to every page. */
+:root {
+  color-scheme: dark; /* Keep native browser controls in the dark color scheme. */
+  --theme-bg: #1e1e1e; /* VS Code Dark+ editor background. */
+  --theme-text: #d4d4d4; /* VS Code default foreground text. */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; /* System type stack used unless a page overrides it. */
+}
+
+/* Set the shared heading face and a layered shadow for more visual depth. */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Camiro.ttf', system-ui, sans-serif;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .7), 0 5px 14px rgba(0, 0, 0, .55);
+}
+
+/* Use border-box sizing as a low-specificity default for page elements. */
+:where(*, *::before, *::after) {
+  box-sizing: border-box;
+}
+
+/* Provide a dark canvas and foreground as overridable document defaults. */
+:where(html) {
+  min-height: 100%;
+  background: var(--theme-bg);
+  color-scheme: dark;
+}
+
+/* Set shared body spacing, colors, and typography without outranking page CSS. */
+:where(body) {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* Prevent media from overflowing its containing block by default. */
+:where(img, svg, video, canvas) {
+  max-width: 100%;
+}
+
+/* Let links inherit their surrounding text color unless a page styles them. */
+:where(a) {
+  color: inherit;
+}
+
+/* Give form controls the page's type and text color unless locally overridden. */
+:where(button, input, select, textarea) {
+  color: inherit;
+  font: inherit;
+}
