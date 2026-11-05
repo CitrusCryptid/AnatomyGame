@@ -25,9 +25,9 @@
         links: [
         { label: 'Home', href: 'https://bfinkelsteinedu.carrd.co/', newTab: true },
         { label: 'Landing', href: 'https://bfmediasolutions.com' },
-        { label: 'Gibbon Quiz', href: '/gibbon-quiz/' },
-        { label: 'Drag & Drop - OG', href: '/drag-drop/' },
-        { label: 'Drag & Drop - AI Version', href: '/drag-ai/' },
+        { label: 'Gibbon Quiz', href: 'https://bfmediasolutions.com/gibbon-quiz/' },
+        { label: 'Drag & Drop - OG', href: 'https://bfmediasolutions.com/drag-drop/' },
+        { label: 'Drag & Drop - AI Version', href: 'https://bfmediasolutions.com/drag-ai/' },
         { label: 'Muscle Trainer Game', href: 'https://anatomy.bfmediasolutions.com' },
         ]
     };
