@@ -10,6 +10,7 @@
     * The sidebar lives in a Shadow DOM, so its CSS can't clash with your page's CSS
     * (and your page's CSS can't break the sidebar).
     */
+   
     (function () {
     'use strict';
 
