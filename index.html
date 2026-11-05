@@ -1,0 +1,57 @@
+<!-- Single-level Bicep Curl activity. Keep the game page, stylesheet, script, and URL paths in place. -->
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Muscle Mechanics</title>
+        <link rel="stylesheet" href="../style.css">
+        <link rel="stylesheet" href="musclegame.css">
+        <script src="../Sidebar.JS" defer></script>
+</head>
+
+<body>
+    <main>
+        <header class="page-header">
+            <div>
+                <h1>Muscle Mechanics</h1>
+                <p class="sub">Hold each muscle’s key to contract it. Gravity never stops pulling, so choose the right muscles
+                    at the right time.</p>
+            </div>
+            <p class="level-label">Level 1 · Bicep Curl</p>
+        </header>
+        <div class="workspace">
+            <section class="game-column" aria-label="Exercise game">
+                <div class="stage">
+            <canvas id="c" width="640" height="540"></canvas>
+            <div class="hud">
+                <div class="goal" id="goal"></div>
+                <div><b id="t">0.0</b>s · <span id="stepclock">0.0</span>s step</div>
+            </div>
+            <div id="ov">
+                <div class="m" id="med"></div>
+                <h2 id="mt" style="margin:0"></h2>
+                <div id="mi" style="color:var(--mut)"></div>
+                <div class="row"><button id="retry">Play again</button></div>
+            </div>
+                </div>
+                <div class="keys" id="keys"></div>
+                <div class="medals" id="info"></div>
+            </section>
+            <aside id="overview" class="overview" aria-live="polite" aria-label="Exercise guide">
+                <h2>Elbow flexors: biceps brachii, brachialis, and brachioradialis</h2>
+                <p>These muscles bend the elbow. The biceps also turns the palm up and assists shoulder flexion; the brachialis is a strong elbow flexor in any hand position. The triceps straightens the elbow. Keep the upper arm quiet and wrist neutral to control both lifting and lowering.</p>
+                <p><b>Movement checkpoints</b></p>
+                <ol>
+                    <li>CONCENTRIC · Exhale and bend the elbows; keep elbows close to your sides, wrists straight, and shoulders relaxed. Pause at the top without swinging.</li>
+                    <li>ECCENTRIC · Inhale and lower smoothly until arms are nearly straight; keep control and do not let the weight pull your shoulders forward.</li>
+                </ol>
+                <p><a target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=ACE+Fitness+bicep+curl+proper+form">Watch an instructional video ↗</a></p>
+            </aside>
+        </div>
+    </main>
+        <script src="musclegame.js" defer></script>
+</body>
+
+</html>
