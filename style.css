@@ -22,7 +22,7 @@
 
 /* Set the shared heading face and a layered shadow for more visual depth. */
 :where(h1, h2, h3, h4, h5, h6) {
-  font-family: 'Camiro.ttf', system-ui, sans-serif;
+  font-family: 'Poppins', system-ui, sans-serif;
   text-shadow: 0 2px 0 rgba(0, 0, 0, .7), 0 5px 14px rgba(0, 0, 0, .55);
 }
 

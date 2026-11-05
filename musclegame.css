@@ -97,7 +97,7 @@ main {
 
 /* Override the shared display face with a clean system UI face on game headings. */
 h1, h2, h3, h4, h5, h6 {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+    font-family: 'Poppins', system-ui, sans-serif
 }
 
 h1 {
