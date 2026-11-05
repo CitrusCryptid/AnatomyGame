@@ -10,7 +10,7 @@
     * The sidebar lives in a Shadow DOM, so its CSS can't clash with your page's CSS
     * (and your page's CSS can't break the sidebar).
     */
-   
+
     (function () {
     'use strict';
 
@@ -28,7 +28,7 @@
         { label: 'Gibbon Quiz', href: 'https://citruscryptid.github.io/EME6208-Projects/gibbon-quiz/index.html' },
         { label: 'Drag & Drop - OG', href: 'https://citruscryptid.github.io/EME6208-Projects/drag-drop/index.html' },
         { label: 'Drag & Drop - AI Version', href: 'https://citruscryptid.github.io/EME6208-Projects/drag-ai/index.html' },
-        { label: 'Muscle Trainer Game', href: 'https://citruscryptid.github.io/MuscleTrainerGame/game/index.html' },
+        { label: 'Muscle Trainer Game', href: 'https://citruscryptid.github.io/AnatomyGame/' },
         ]
     };
 
