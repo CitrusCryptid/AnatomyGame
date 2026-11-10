@@ -35,6 +35,88 @@ body {
     font-family: var(--ff-poppins)
 }
 
+/* Required motion preview shown until the player enters the level. */
+.intro-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(8px)
+}
+
+.intro-screen[hidden] { display: none }
+
+.intro-card {
+    width: min(100%, 680px);
+    padding: clamp(20px, 5vw, 38px);
+    text-align: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .5)
+}
+
+.intro-kicker { margin: 0 0 7px; color: var(--act); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase }
+.intro-card h1 { margin-bottom: 10px; font-size: clamp(28px, 6vw, 40px) }
+.intro-card h1::after { margin: 9px auto 0 }
+.intro-copy { max-width: 520px; margin: 0 auto 18px; color: var(--mut); line-height: 1.65 }
+
+.motion-demo {
+    position: relative;
+    width: min(100%, 440px);
+    margin: 0 auto;
+    padding: 12px;
+    overflow: hidden;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px
+}
+
+.motion-demo svg { display: block; width: 100%; height: auto }
+.demo-floor { stroke: var(--line); stroke-width: 3 }
+.demo-skin, .demo-limb { fill: none; stroke: var(--skin); stroke-width: 19; stroke-linecap: round; stroke-linejoin: round }
+.demo-torso, .demo-legs { fill: none; stroke: var(--skin2); stroke-width: 25; stroke-linecap: round; stroke-linejoin: round }
+.demo-upper-arm { fill: none; stroke: var(--mus); stroke-width: 19; stroke-linecap: round }
+.demo-joint { fill: var(--act); stroke: var(--bg); stroke-width: 3 }
+.demo-hand { fill: var(--skin); stroke: var(--bg); stroke-width: 2 }
+.demo-forearm { transform-box: view-box; transform-origin: 160px 145px; animation: elbow-curl 2.8s ease-in-out infinite }
+.demo-arrow, .demo-arrow-head { fill: none; stroke: var(--ok); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round }
+
+.motion-label { position: absolute; top: 14px; color: var(--mut); font-size: clamp(9px, 2vw, 11px); font-weight: 700; letter-spacing: .08em; animation: label-pulse 2.8s ease-in-out infinite }
+.extension-label { left: 14px }
+.flexion-label { right: 14px; color: var(--act); animation-delay: 1.4s }
+.intro-hint { margin: 14px 0 18px; color: var(--mut); font-size: 13px }
+
+.start-level {
+    min-height: 46px;
+    padding: 0 22px;
+    border-color: var(--act);
+    background: var(--act);
+    color: var(--bg);
+    font-weight: 700
+}
+.start-level:hover { filter: brightness(1.08) }
+.start-level:focus-visible { outline: 3px solid var(--ok); outline-offset: 3px }
+
+@keyframes elbow-curl {
+    0%, 12%, 88%, 100% { transform: rotate(0deg) }
+    45%, 58% { transform: rotate(-105deg) }
+}
+
+@keyframes label-pulse {
+    0%, 42%, 100% { opacity: .45 }
+    48%, 88% { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .demo-forearm, .motion-label { animation: none }
+    .motion-label { opacity: 1 }
+}
+
 /* Center the game and constrain its maximum width. */
 main {
     width: min(1440px, 100%);

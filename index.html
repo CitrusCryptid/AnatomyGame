@@ -14,6 +14,33 @@
 </head>
 
 <body>
+    <section id="intro" class="intro-screen" aria-labelledby="intro-title">
+        <div class="intro-card">
+            <p class="intro-kicker">Level 1 · Movement preview</p>
+            <h1 id="intro-title">Bicep Curl</h1>
+            <p class="intro-copy">Watch the elbow move before you begin. This level practices elbow flexion to curl the weight and elbow extension to lower it with control.</p>
+            <div class="motion-demo" role="img" aria-label="An animated arm repeatedly bends at the elbow, then straightens">
+                <span class="motion-label extension-label">ELBOW EXTENSION</span>
+                <span class="motion-label flexion-label">ELBOW FLEXION</span>
+                <svg viewBox="0 0 320 230" aria-hidden="true" focusable="false">
+                    <line x1="20" y1="205" x2="300" y2="205" class="demo-floor" />
+                    <circle cx="112" cy="48" r="23" class="demo-skin" />
+                    <path d="M112 74 L112 150" class="demo-torso" />
+                    <path d="M112 148 L78 200 M112 148 L145 200" class="demo-legs" />
+                    <path d="M112 84 L160 145" class="demo-upper-arm" />
+                    <circle cx="160" cy="145" r="8" class="demo-joint" />
+                    <g class="demo-forearm">
+                        <path d="M160 145 L247 145" class="demo-limb" />
+                        <circle cx="247" cy="145" r="7" class="demo-hand" />
+                    </g>
+                    <path d="M157 116 A33 33 0 0 1 189 139" class="demo-arrow" />
+                    <path d="M183 134 L190 140 L181 142" class="demo-arrow-head" />
+                </svg>
+            </div>
+            <p class="intro-hint">The upper arm stays quiet while the forearm bends and straightens.</p>
+            <button id="start-level" class="start-level" type="button">Start Level 1</button>
+        </div>
+    </section>
     <main>
         <header class="page-header">
             <div>

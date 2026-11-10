@@ -106,6 +106,7 @@ let state = TASK.init();
 let stage = 0;
 let startedAt = null;
 let completed = false;
+let levelReady = false;
 let resultTimer;
 let activation = {};
 let held = {};
@@ -130,6 +131,7 @@ function buildInterface() {
         card.innerHTML = `<span class="cap">${key.toUpperCase()}</span><b>${name}</b><small>${role}</small><i></i>`;
         const press = event => {
             event.preventDefault();
+            if (!levelReady) return;
             held[key] = true;
             begin();
         };
@@ -167,7 +169,7 @@ function reset() {
 }
 
 function begin() {
-    if (startedAt === null && !completed) startedAt = performance.now();
+    if (levelReady && startedAt === null && !completed) startedAt = performance.now();
 }
 
 function finish() {
@@ -188,7 +190,13 @@ function finish() {
 }
 
 byId('retry').addEventListener('click', reset);
+byId('start-level').addEventListener('click', () => {
+    levelReady = true;
+    byId('intro').hidden = true;
+    reset();
+});
 addEventListener('keydown', event => {
+    if (!levelReady) return;
     if (event.code === 'Space') {
         event.preventDefault();
         reset();
@@ -309,11 +317,11 @@ function frame(now) {
     lastFrame = now;
 
     for (const key in activation) {
-        activation[key] += ((held[key] ? 1 : 0) - activation[key]) * Math.min(1, delta * 10);
+        activation[key] += ((levelReady && held[key] ? 1 : 0) - activation[key]) * Math.min(1, delta * 10);
         keyMeters[key].style.width = `${activation[key] * 100}%`;
     }
 
-    if (!completed) {
+    if (levelReady && !completed) {
         for (let i = 0; i < 2; i++) applyPhysics(state, TASK.torque(state, activation), TASK.config, delta / 2);
         if (startedAt !== null) {
             byId('t').textContent = ((now - startedAt) / 1000).toFixed(1);
