@@ -61,6 +61,9 @@ body {
 }
 
 .intro-kicker { margin: 0 0 7px; color: var(--act); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase }
+.level-picker { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 22px }
+.level-option { padding: 7px 12px; border-radius: 999px; color: var(--mut); font-size: 12px }
+.level-option.is-active { border-color: var(--act); color: var(--fg); background: color-mix(in srgb, var(--act) 12%, var(--card)) }
 .intro-card h1 { margin-bottom: 10px; font-size: clamp(28px, 6vw, 40px) }
 .intro-card h1::after { margin: 9px auto 0 }
 .intro-copy { max-width: 520px; margin: 0 auto 18px; color: var(--mut); line-height: 1.65 }
@@ -102,6 +105,17 @@ body {
 .start-level:hover { filter: brightness(1.08) }
 .start-level:focus-visible { outline: 3px solid var(--ok); outline-offset: 3px }
 
+.demo-pullup-bar { stroke: var(--line); stroke-width: 8; stroke-linecap: round }
+.demo-pullup-limb { fill: none; stroke: var(--skin); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round }
+.demo-pullup-back { fill: none; stroke: var(--skin2); stroke-width: 34; stroke-linecap: round }
+.demo-pullup-lats { fill: none; stroke: var(--mus); stroke-width: 12; stroke-linecap: round }
+.demo-pullup-body { transform-box: view-box; animation: pullup-preview 2.8s ease-in-out infinite }
+
+@keyframes pullup-preview {
+    0%, 14%, 86%, 100% { transform: translateY(0) }
+    45%, 58% { transform: translateY(-25px) }
+}
+
 @keyframes elbow-curl {
     0%, 12%, 88%, 100% { transform: rotate(0deg) }
     45%, 58% { transform: rotate(-105deg) }
@@ -113,7 +127,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .demo-forearm, .motion-label { animation: none }
+    .demo-forearm, .demo-pullup-body, .motion-label { animation: none }
     .motion-label { opacity: 1 }
 }
 
