@@ -25,6 +25,20 @@ function armPoints(shoulder, upperAngle, elbowAngle) {
     return [shoulder, elbow, polar(elbow, upperAngle + elbowAngle, FOREARM)];
 }
 
+function elbowPoint(shoulder, hand, side, segmentLength = 102) {
+    const dx = hand[0] - shoulder[0];
+    const dy = hand[1] - shoulder[1];
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const half = Math.min(distance / 2, segmentLength - .01);
+    const height = Math.sqrt(Math.max(0, segmentLength * segmentLength - half * half));
+    const perpendicularX = -dy / distance;
+    const perpendicularY = dx / distance;
+    return [
+        (shoulder[0] + hand[0]) / 2 + perpendicularX * height * side,
+        (shoulder[1] + hand[1]) / 2 + perpendicularY * height * side
+    ];
+}
+
 function standingPose() {
     const hip = [240, FLOOR - 220];
     const shoulder = [hip[0], hip[1] - 115];
@@ -95,18 +109,19 @@ const TASKS = {
     pullup: {
         name: 'Pull-up',
         muscles: [
-            ['a', 'Left pulling group', 'Latissimus + elbow flexors'],
-            ['l', 'Right pulling group', 'Latissimus + elbow flexors']
+            ['a', 'Left latissimus dorsi', 'Pulls the upper arm down'],
+            ['s', 'Left elbow flexors', 'Biceps brachii + brachialis'],
+            ['k', 'Right elbow flexors', 'Biceps brachii + brachialis'],
+            ['l', 'Right latissimus dorsi', 'Pulls the upper arm down']
         ],
         init: () => ({ pull: 0, lean: 0 }),
         config: { pull: [8, 4, 0, 1.3], lean: [5, 6, -.5, .5] },
         torque: (state, activation) => {
-            // Each side key represents a simplified latissimus + elbow-flexor synergy.
-            const left = activation.a || 0;
-            const right = activation.l || 0;
+            const left = .65 * (activation.a || 0) + .35 * (activation.s || 0);
+            const right = .65 * (activation.l || 0) + .35 * (activation.k || 0);
             return {
-                pull: 1.25 * left * right - .32 - .2 * state.pull,
-                lean: .55 * (left - right) - 1.1 * state.lean
+                pull: 1.7 * Math.min(left, right) - .42 - .18 * state.pull,
+                lean: .7 * (left - right) - 1.1 * state.lean
             };
         },
         pose(state) {
@@ -116,12 +131,12 @@ const TASKS = {
             const shoulderY = 280 - amount * 118;
             const shoulder = [centerX, shoulderY];
             const hip = [320 - lean * 18, 412 - amount * 108];
-            const leftShoulder = [centerX - 48, shoulderY + 10];
-            const rightShoulder = [centerX + 48, shoulderY + 10];
-            const leftElbow = [232 - amount * 12, 198 + amount * 18];
-            const rightElbow = [408 + amount * 12, 198 + amount * 18];
-            const leftHand = [210, 108];
-            const rightHand = [430, 108];
+            const leftShoulder = [centerX - 48, shoulderY + 10 + lean * 22];
+            const rightShoulder = [centerX + 48, shoulderY + 10 - lean * 22];
+            const leftHand = [245, 108];
+            const rightHand = [395, 108];
+            const leftElbow = elbowPoint(leftShoulder, leftHand, -1);
+            const rightElbow = elbowPoint(rightShoulder, rightHand, 1);
             return {
                 view: 'back', bar: true, shoulder, hip,
                 legs: [
@@ -132,16 +147,40 @@ const TASKS = {
                     [leftShoulder, leftElbow, leftHand],
                     [rightShoulder, rightElbow, rightHand]
                 ],
-                points: { chin: [centerX, shoulderY - 20] },
+                points: {
+                    chin: [centerX, shoulderY - 20],
+                    leftShoulder,
+                    rightShoulder
+                },
                 muscles: [
                     ['a', [leftShoulder[0] + 8, shoulderY + 25], [hip[0] - 26, hip[1] - 18], 25],
                     ['l', [rightShoulder[0] - 8, shoulderY + 25], [hip[0] + 26, hip[1] - 18], 25]
                 ],
+                flexorPoints: [['s', leftElbow], ['k', rightElbow]],
                 drawFront: () => {}
             };
         },
         stages: [
-            { text: 'Pull up evenly toward the bar', isDone: state => state.pull >= 1.08 && Math.abs(state.lean) < .14, goal: { pull: 1.3, lean: 0 }, point: 'chin' },
+            {
+                text: 'Pull until both shoulders reach their rings together, without leaning',
+                isDone: state => state.pull >= 1.08,
+                goal: { pull: 1.3, lean: 0 },
+                checkpoints: ['leftShoulder', 'rightShoulder'],
+                score(state, activation) {
+                    const pose = TASKS.pullup.pose(state);
+                    const targets = TASKS.pullup.pose({ pull: 1.3, lean: 0 }).points;
+                    const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+                    const leftError = distance(pose.points.leftShoulder, targets.leftShoulder);
+                    const rightError = distance(pose.points.rightShoulder, targets.rightShoulder);
+                    const levelFactor = clamp(1 - Math.abs(state.lean) / .35, 0, 1);
+                    const allGroupsActive = ['a', 's', 'k', 'l'].every(key => (activation[key] || 0) >= .85);
+                    if (leftError <= 16 && rightError <= 16 && Math.abs(state.lean) <= .04 && allGroupsActive) return 50;
+                    const proximity = clamp(1 - (leftError + rightError) / 70, 0, 1);
+                    const synchrony = clamp(1 - Math.abs(leftError - rightError) / 35, 0, 1);
+                    const muscleUse = .65 * ((activation.a + activation.l) / 2) + .35 * ((activation.s + activation.k) / 2);
+                    return Math.round(49 * proximity * synchrony * levelFactor * muscleUse);
+                }
+            },
             { text: 'Lower back to the hanging position', isDone: state => state.pull <= .08, goal: { pull: 0, lean: 0 }, point: 'chin' }
         ]
     }
@@ -155,7 +194,7 @@ const GUIDES = {
     },
     pullup: {
         title: 'Back and arm pulling muscles',
-        text: 'A pull-up uses more than the latissimus dorsi. The lats help pull the upper arms toward the torso, while elbow flexors such as the biceps brachii and brachialis bend the elbows. Shoulder-blade muscles also help coordinate and stabilize the movement. A and L each represent a simplified pulling group on one side, combining back and elbow-flexor contributions; they are not isolated muscles.',
+        text: 'The latissimus dorsi helps pull the upper arms toward the torso. The biceps brachii, brachialis, and brachioradialis help flex the elbows, while trapezius and other shoulder-blade muscles help coordinate and stabilize the movement. A/L activate the left/right latissimus; S/K activate the left/right elbow-flexor group. This back view highlights the lats and uses elbow indicators for the flexors because the biceps lie on the front of the arm.',
         video: 'https://pubmed.ncbi.nlm.nih.gov/21068680/'
     }
 };
@@ -166,8 +205,8 @@ const FORM_STEPS_BY_LEVEL = {
         'ECCENTRIC · Inhale and lower smoothly until arms are nearly straight; keep control and do not let the weight pull your shoulders forward.'
     ],
     pullup: [
-        'CONCENTRIC · Hold A and L together to activate the left and right pulling groups. Notice how balanced input moves the back and arms toward the bar.',
-        'ECCENTRIC · Release both keys and observe the coordinated back and arm groups as the figure lowers to the hanging start position.'
+        'CONCENTRIC · Coordinate A + S on the left with K + L on the right. Use all four groups to pull evenly until both shoulder rings align together.',
+        'ECCENTRIC · Release the four inputs and watch the shoulders return to the hanging position together.'
     ]
 };
 
@@ -186,8 +225,8 @@ const PREVIEWS = {
     },
     pullup: {
         title: 'Pull-Up',
-        copy: 'Watch the back view as the back and arm muscles work together to pull the body toward the bar, then lower it again.',
-        hint: 'A and L represent left and right pulling groups, combining the lats with elbow flexors such as the biceps. Hold both together for a balanced pull.',
+        copy: 'Watch the back view as the lats and elbow flexors work together to pull the body toward the bar, then lower it again.',
+        hint: 'A/L activate the left/right lats; S/K activate the left/right elbow flexors. Coordinate all four for full points and no lean.',
         aria: 'A back-view figure moves upward toward a pull-up bar and lowers again',
         markup: '<span class="motion-label extension-label">PAIRED PULL</span><span class="motion-label flexion-label">CONTROLLED RETURN</span><svg viewBox="0 0 320 230" aria-hidden="true" focusable="false"><line x1="35" y1="46" x2="285" y2="46" class="demo-pullup-bar"/><g class="demo-pullup-body"><circle cx="160" cy="89" r="19" class="demo-skin"/><path d="M160 111 L160 177" class="demo-pullup-back"/><path d="M160 125 L129 170 M160 125 L191 170" class="demo-legs"/><path d="M139 122 L105 94 L83 47 M181 122 L215 94 L237 47" class="demo-pullup-limb"/><path d="M145 132 L157 174 M175 132 L163 174" class="demo-pullup-lats"/></g></svg>'
     }
@@ -370,40 +409,117 @@ function drawPullupBar() {
     ctx.stroke();
 }
 
+function drawPullupHuman(pose) {
+    const skin = color('--skin');
+    const shadow = color('--skin2');
+    const shorts = color('--short');
+    const cx = pose.shoulder[0];
+    const sy = pose.shoulder[1];
+    const hx = pose.hip[0];
+    const hy = pose.hip[1];
+
+    // Legs and arms sit behind the torso, with limb widths scaled to the head and trunk.
+    pose.legs.forEach(leg => {
+        drawLimb(leg[0], leg[1], 29, shadow);
+        drawLimb(leg[1], leg[2], 22, skin);
+        drawLimb(leg[2], leg[3], 13, skin);
+    });
+    pose.arms.forEach(arm => {
+        drawLimb(arm[0], arm[1], 27, skin);
+        drawLimb(arm[1], arm[2], 21, skin);
+    });
+
+    // Tapered torso silhouette with broad shoulders, a narrower waist, and defined hips.
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.moveTo(cx - 48, sy + 5);
+    ctx.bezierCurveTo(cx - 66, sy + 22, hx - 55, hy - 44, hx - 37, hy + 3);
+    ctx.lineTo(hx + 37, hy + 3);
+    ctx.bezierCurveTo(hx + 55, hy - 44, cx + 66, sy + 22, cx + 48, sy + 5);
+    ctx.quadraticCurveTo(cx, sy - 10, cx - 48, sy + 5);
+    ctx.closePath();
+    ctx.fill();
+
+    // Shoulder caps and posterior muscle shapes preserve the rear camera angle.
+    ctx.fillStyle = shadow;
+    ctx.beginPath();
+    ctx.ellipse(cx - 48, sy + 16, 28, 24, -.22, 0, Math.PI * 2);
+    ctx.ellipse(cx + 48, sy + 16, 28, 24, .22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = color('--mus');
+    ctx.globalAlpha = .48;
+    ctx.beginPath();
+    ctx.moveTo(cx - 16, sy + 7);
+    ctx.quadraticCurveTo(cx - 35, sy + 28, cx - 42, sy + 54);
+    ctx.quadraticCurveTo(cx - 14, sy + 67, cx, sy + 79);
+    ctx.quadraticCurveTo(cx + 14, sy + 67, cx + 42, sy + 54);
+    ctx.quadraticCurveTo(cx + 35, sy + 28, cx + 16, sy + 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - 42, sy + 48);
+    ctx.quadraticCurveTo(hx - 55, sy + 92, hx - 30, hy - 10);
+    ctx.quadraticCurveTo(hx - 4, hy - 22, hx - 5, sy + 82);
+    ctx.quadraticCurveTo(cx - 12, sy + 65, cx - 42, sy + 48);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + 42, sy + 48);
+    ctx.quadraticCurveTo(hx + 55, sy + 92, hx + 30, hy - 10);
+    ctx.quadraticCurveTo(hx + 4, hy - 22, hx + 5, sy + 82);
+    ctx.quadraticCurveTo(cx + 12, sy + 65, cx + 42, sy + 48);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Spine and scapular contours clarify orientation without changing the visual palette.
+    ctx.strokeStyle = color('--line');
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, sy + 30);
+    ctx.lineTo(hx, hy - 7);
+    ctx.moveTo(cx - 39, sy + 42);
+    ctx.quadraticCurveTo(cx - 27, sy + 76, cx - 7, sy + 70);
+    ctx.moveTo(cx + 39, sy + 42);
+    ctx.quadraticCurveTo(cx + 27, sy + 76, cx + 7, sy + 70);
+    ctx.stroke();
+
+    ctx.fillStyle = shorts;
+    ctx.beginPath();
+    ctx.moveTo(hx - 38, hy - 3);
+    ctx.quadraticCurveTo(hx, hy + 13, hx + 38, hy - 3);
+    ctx.lineTo(hx + 34, hy + 23);
+    ctx.lineTo(hx - 34, hy + 23);
+    ctx.closePath();
+    ctx.fill();
+
+    // Neck, rear of head, hair, elbows, and gripping hands.
+    drawLimb([cx, sy + 4], [cx, sy - 16], 20, shadow);
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.arc(cx, sy - 41, 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = color('--card');
+    ctx.beginPath();
+    ctx.arc(cx, sy - 49, 22, Math.PI, Math.PI * 2);
+    ctx.fill();
+    pose.arms.forEach(arm => {
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.arc(arm[1][0], arm[1][1], 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = skin;
+        ctx.beginPath();
+        ctx.arc(arm[2][0], arm[2][1], 12, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
 function drawHuman(pose) {
     const skin = color('--skin');
     const shorts = color('--short');
     if (pose.view === 'back') {
-        pose.legs.forEach((leg, index) => {
-            const tone = index === 0 ? color('--skin2') : skin;
-            drawLimb(leg[0], leg[1], 25, tone);
-            drawLimb(leg[1], leg[2], 19, tone);
-            drawLimb(leg[2], leg[3], 12, tone);
-        });
-        drawLimb(pose.shoulder, pose.hip, 58, color('--skin2'));
-        drawLimb([pose.hip[0] - 30, pose.hip[1] + 4], [pose.hip[0] + 30, pose.hip[1] + 4], 28, shorts);
-        pose.arms.forEach(arm => {
-            drawLimb(arm[0], arm[1], 22, skin);
-            drawLimb(arm[1], arm[2], 17, skin);
-            ctx.fillStyle = skin;
-            ctx.beginPath();
-            ctx.arc(arm[2][0], arm[2][1], 9, 0, Math.PI * 2);
-            ctx.fill();
-        });
-        ctx.strokeStyle = color('--skin2');
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(pose.shoulder[0] - 25, pose.shoulder[1] + 6);
-        ctx.lineTo(pose.shoulder[0] + 25, pose.shoulder[1] + 6);
-        ctx.stroke();
-        ctx.fillStyle = skin;
-        ctx.beginPath();
-        ctx.arc(pose.shoulder[0], pose.shoulder[1] - 38, 21, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = color('--card');
-        ctx.beginPath();
-        ctx.arc(pose.shoulder[0], pose.shoulder[1] - 49, 19, Math.PI, Math.PI * 2);
-        ctx.fill();
+        drawPullupHuman(pose);
         return;
     }
     const head = [pose.shoulder[0] + 8, pose.shoulder[1] - 40];
@@ -454,6 +570,21 @@ function drawMuscle(a, b, width, amount) {
     }
 }
 
+function drawFlexorIndicator(point, amount) {
+    ctx.beginPath();
+    ctx.arc(point[0], point[1], 15, 0, Math.PI * 2);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = color('--mus');
+    ctx.stroke();
+    if (amount > .02) {
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], 15, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * amount);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = color('--act');
+        ctx.stroke();
+    }
+}
+
 function render() {
     const pose = TASK.pose(state);
     const floor = FLOOR;
@@ -468,19 +599,25 @@ function render() {
     ctx.stroke();
 
     const goalStage = TASK.stages[Math.min(stage, TASK.stages.length - 1)];
-    const goal = TASK.pose({ ...TASK.init(), ...goalStage.goal }).points[goalStage.point];
-    ctx.setLineDash([6, 5]);
-    ctx.strokeStyle = color('--ok');
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(goal[0], goal[1], 24, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
+    const goalPose = TASK.pose({ ...TASK.init(), ...goalStage.goal });
+    const goals = goalStage.checkpoints
+        ? goalStage.checkpoints.map(name => goalPose.points[name])
+        : [goalPose.points[goalStage.point]];
     if (pose.bar) drawPullupBar();
     drawHuman(pose);
     pose.muscles.forEach(([key, start, end, width]) => drawMuscle(start, end, width, activation[key] || 0));
+    (pose.flexorPoints || []).forEach(([key, point]) => drawFlexorIndicator(point, activation[key] || 0));
     pose.drawFront();
+
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = color('--ok');
+    ctx.lineWidth = 3;
+    goals.forEach(goal => {
+        ctx.beginPath();
+        ctx.arc(goal[0], goal[1], 24, 0, Math.PI * 2);
+        ctx.stroke();
+    });
+    ctx.setLineDash([]);
 
     ctx.font = 'bold 11px system-ui';
     ctx.textAlign = 'center';
@@ -513,7 +650,8 @@ function frame(now) {
                 byId('stepclock').textContent = Math.max(0, .5 - elapsed).toFixed(1);
                 if (elapsed >= .5) {
                     accuratePhases++;
-                    points += 50;
+                    const phaseScore = TASK.stages[stage].score ? TASK.stages[stage].score(state, activation) : 50;
+                    points += phaseScore;
                     stage++;
                     phaseStartedAt = null;
                     byId('stepclock').textContent = '0.5';
