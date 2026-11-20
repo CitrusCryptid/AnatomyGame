@@ -106,14 +106,21 @@ body {
 .start-level:focus-visible { outline: 3px solid var(--ok); outline-offset: 3px }
 
 .demo-pullup-bar { stroke: var(--line); stroke-width: 8; stroke-linecap: round }
-.demo-pullup-limb { fill: none; stroke: var(--skin); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round }
-.demo-pullup-back { fill: none; stroke: var(--skin2); stroke-width: 34; stroke-linecap: round }
-.demo-pullup-lats { fill: none; stroke: var(--mus); stroke-width: 12; stroke-linecap: round }
+.demo-pullup-limb { fill: none; stroke: var(--skin); stroke-width: 16; stroke-linecap: round; stroke-linejoin: round }
+.demo-pullup-head { fill: var(--skin); stroke: var(--line); stroke-width: 2 }
+.demo-pullup-shoulder { fill: var(--skin2); stroke: var(--line); stroke-width: 1.5 }
+.demo-pullup-torso { fill: var(--skin2); stroke: var(--line); stroke-width: 2; stroke-linejoin: round }
+.demo-pullup-legs { fill: var(--skin); stroke: var(--line); stroke-width: 2; stroke-linejoin: round }
+.demo-pullup-lats { fill: var(--mus); stroke: var(--act); stroke-width: 1.5; stroke-linejoin: round }
+.demo-pullup-elbow { fill: var(--act); stroke: var(--bg); stroke-width: 3 }
+.demo-pullup-label, .demo-pullup-flexor-label { font: 700 10px system-ui, sans-serif; letter-spacing: .06em }
+.demo-pullup-label { fill: var(--mus) }
+.demo-pullup-flexor-label { fill: var(--act) }
 .demo-pullup-body { transform-box: view-box; animation: pullup-preview 2.8s ease-in-out infinite }
 
 @keyframes pullup-preview {
     0%, 14%, 86%, 100% { transform: translateY(0) }
-    45%, 58% { transform: translateY(-25px) }
+    45%, 58% { transform: translateY(-12px) }
 }
 
 @keyframes elbow-curl {

@@ -110,8 +110,8 @@ const TASKS = {
         name: 'Pull-up',
         muscles: [
             ['a', 'Left latissimus dorsi', 'Pulls the upper arm down'],
-            ['s', 'Left elbow flexors', 'Biceps brachii + brachialis'],
-            ['k', 'Right elbow flexors', 'Biceps brachii + brachialis'],
+            ['s', 'Left elbow flexors', 'Biceps + brachialis'],
+            ['k', 'Right elbow flexors', 'Biceps + brachialis'],
             ['l', 'Right latissimus dorsi', 'Pulls the upper arm down']
         ],
         init: () => ({ pull: 0, lean: 0 }),
@@ -228,7 +228,7 @@ const PREVIEWS = {
         copy: 'Watch the back view as the lats and elbow flexors work together to pull the body toward the bar, then lower it again.',
         hint: 'A/L activate the left/right lats; S/K activate the left/right elbow flexors. Coordinate all four for full points and no lean.',
         aria: 'A back-view figure moves upward toward a pull-up bar and lowers again',
-        markup: '<span class="motion-label extension-label">PAIRED PULL</span><span class="motion-label flexion-label">CONTROLLED RETURN</span><svg viewBox="0 0 320 230" aria-hidden="true" focusable="false"><line x1="35" y1="46" x2="285" y2="46" class="demo-pullup-bar"/><g class="demo-pullup-body"><circle cx="160" cy="89" r="19" class="demo-skin"/><path d="M160 111 L160 177" class="demo-pullup-back"/><path d="M160 125 L129 170 M160 125 L191 170" class="demo-legs"/><path d="M139 122 L105 94 L83 47 M181 122 L215 94 L237 47" class="demo-pullup-limb"/><path d="M145 132 L157 174 M175 132 L163 174" class="demo-pullup-lats"/></g></svg>'
+        markup: '<span class="motion-label extension-label">PULL UP</span><span class="motion-label flexion-label">LOWER</span><svg viewBox="0 0 360 220" aria-hidden="true" focusable="false"><line x1="68" y1="20" x2="292" y2="20" class="demo-pullup-bar"/><path d="M133 87 L105 63 L101 20 M227 87 L255 63 L259 20" class="demo-pullup-limb"/><g class="demo-pullup-body"><circle cx="180" cy="54" r="19" class="demo-pullup-head"/><ellipse cx="141" cy="87" rx="20" ry="17" class="demo-pullup-shoulder"/><ellipse cx="219" cy="87" rx="20" ry="17" class="demo-pullup-shoulder"/><path d="M143 78 Q180 66 217 78 L229 130 Q180 150 131 130 Z" class="demo-pullup-torso"/><path d="M131 128 Q150 137 169 135 L165 184 L145 184 Z M191 135 Q210 137 229 128 L215 184 L195 184 Z" class="demo-pullup-legs"/><path d="M151 89 Q160 103 173 124 L161 130 Q147 111 139 98 Z M209 89 Q200 103 187 124 L199 130 Q213 111 221 98 Z" class="demo-pullup-lats"/></g><circle cx="105" cy="63" r="8" class="demo-pullup-elbow"/><circle cx="255" cy="63" r="8" class="demo-pullup-elbow"/><text x="26" y="143" class="demo-pullup-label">LATS</text><text x="334" y="143" text-anchor="end" class="demo-pullup-label">LATS</text><text x="84" y="83" text-anchor="end" class="demo-pullup-flexor-label">ELBOW FLEXORS</text><text x="276" y="83" class="demo-pullup-flexor-label">ELBOW FLEXORS</text></svg>'
     }
 };
 
@@ -570,7 +570,7 @@ function drawMuscle(a, b, width, amount) {
     }
 }
 
-function drawFlexorIndicator(point, amount) {
+function drawFlexorIndicator(point, amount, key) {
     ctx.beginPath();
     ctx.arc(point[0], point[1], 15, 0, Math.PI * 2);
     ctx.lineWidth = 5;
@@ -583,6 +583,24 @@ function drawFlexorIndicator(point, amount) {
         ctx.strokeStyle = color('--act');
         ctx.stroke();
     }
+
+    const left = key === 's';
+    const labelX = point[0] + (left ? -22 : 22);
+    const labelY = point[1] + 27;
+    ctx.textAlign = left ? 'right' : 'left';
+    ctx.font = 'bold 11px system-ui';
+    const titleWidth = ctx.measureText('ELBOW FLEXORS').width;
+    ctx.font = '10px system-ui';
+    const muscleWidth = ctx.measureText(`${key.toUpperCase()} · BICEPS + BRACHIALIS`).width;
+    const width = Math.max(titleWidth, muscleWidth);
+    ctx.fillStyle = 'rgba(20, 20, 20, .9)';
+    ctx.fillRect(left ? labelX - width - 6 : labelX - 6, labelY - 14, width + 12, 31);
+    ctx.fillStyle = color('--fg');
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('ELBOW FLEXORS', labelX, labelY - 2);
+    ctx.fillStyle = color('--act');
+    ctx.font = '10px system-ui';
+    ctx.fillText(`${key.toUpperCase()} · BICEPS + BRACHIALIS`, labelX, labelY + 11);
 }
 
 function render() {
@@ -606,7 +624,7 @@ function render() {
     if (pose.bar) drawPullupBar();
     drawHuman(pose);
     pose.muscles.forEach(([key, start, end, width]) => drawMuscle(start, end, width, activation[key] || 0));
-    (pose.flexorPoints || []).forEach(([key, point]) => drawFlexorIndicator(point, activation[key] || 0));
+    (pose.flexorPoints || []).forEach(([key, point]) => drawFlexorIndicator(point, activation[key] || 0, key));
     pose.drawFront();
 
     ctx.setLineDash([6, 5]);
