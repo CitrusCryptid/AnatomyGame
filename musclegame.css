@@ -327,6 +327,10 @@ canvas {
 
 .control-help { margin-top: 10px; padding: 10px 12px; color: var(--fg); background: color-mix(in srgb, var(--act) 8%, var(--card)); border: 1px solid color-mix(in srgb, var(--act) 45%, var(--line)); border-radius: 8px; font-size: 12px; line-height: 1.5 }
 .control-help[hidden], .side-controls[hidden] { display: none }
+.level-tutorial { margin-top: 10px; padding: 12px; background: var(--card); border: 1px solid var(--act); border-radius: 8px }
+.level-tutorial[hidden] { display: none }
+.level-tutorial p { margin: 0 0 10px; font-size: 13px; line-height: 1.5 }
+.level-tutorial button { border-color: var(--act); background: var(--act); color: var(--bg); font-weight: 700 }
 .side-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px }
 .side-control { flex: 1 1 180px; display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; text-align: left; padding: 9px 10px; border-color: var(--line) }
 .side-control .cap { grid-row: span 2; display: inline-grid; min-width: 30px; min-height: 30px; place-items: center; border: 1px solid var(--fg); border-radius: 6px; font-weight: 700 }

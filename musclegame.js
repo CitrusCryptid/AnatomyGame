@@ -83,18 +83,20 @@ function muscleGroupScore(keys, activation) {
     return Math.round(50 * averageActivation(keys, activation));
 }
 
+let pullupTutorialStep = '';
+let pullupTutorialSide = null;
+
 const TASKS = {
     curl: {
         name: 'Bicep curl',
         muscles: [
             ['q', 'Biceps brachii', 'Bends elbow'],
             ['w', 'Brachialis', 'Primary elbow flexor'],
-            ['e', 'Brachioradialis', 'Assists elbow flexion'],
-            ['r', 'Triceps brachii', 'Straightens elbow']
+            ['e', 'Brachioradialis', 'Assists elbow flexion']
         ],
         init: () => ({ flex: 0 }),
         config: { flex: [7, 3, 0, 2.6] },
-        torque: (state, activation) => ({ flex: activation.q + .7 * activation.w + .55 * activation.e - .9 * activation.r - .55 * sin(state.flex) }),
+        torque: (state, activation) => ({ flex: .45 * activation.q + .8 * activation.w + .65 * activation.e - .55 * sin(state.flex) }),
         pose(state) {
             const body = standingPose();
             const shoulder = body.shoulder;
@@ -105,8 +107,7 @@ const TASKS = {
             body.muscles = [
                 ['w', pointOnLine(shoulder, elbow, .45, 6), pointOnLine(elbow, movingArm[2], .22, 5), 13],
                 ['q', pointOnLine(shoulder, elbow, .12, 9), pointOnLine(elbow, movingArm[2], .15, 8), 17],
-                ['e', pointOnLine(shoulder, elbow, .72, -10), pointOnLine(elbow, movingArm[2], .72, -8), 11],
-                ['r', pointOnLine(shoulder, elbow, .12, -10), pointOnLine(elbow, movingArm[2], 0, -10), 16]
+                ['e', pointOnLine(shoulder, elbow, .72, -10), pointOnLine(elbow, movingArm[2], .72, -8), 11]
             ];
             body.drawFront = () => drawWeight(movingArm[2], 11);
             return body;
@@ -123,7 +124,7 @@ const TASKS = {
             left: { key: 'f', label: 'Left side', muscles: ['a', 's'] },
             right: { key: 'j', label: 'Right side', muscles: ['k', 'l'] }
         },
-        controlHelp: 'Use A + S for the left side and K + L for the right. Simpler option: hold F for both left-side muscles and J for both right-side muscles. You can also click the side buttons to toggle them.',
+        controlHelp: 'Tutorial: choose one side only. Hold A + S for the left or K + L for the right; F or J activates a paired side. Keep the other side off.',
         holdHint: 'Both shoulder markers must be inside their rings at the same time, with your torso level. Hold that position for 0.5 seconds; leaving either ring resets progress. Centered alignment and all four active muscles earn the highest score.',
         muscles: [
             ['a', 'Left latissimus dorsi', 'Pulls the upper arm down'],
@@ -136,6 +137,14 @@ const TASKS = {
         torque: (state, activation) => {
             const left = .65 * (activation.a || 0) + .35 * (activation.s || 0);
             const right = .65 * (activation.l || 0) + .35 * (activation.k || 0);
+            if (pullupTutorialStep === 'choose-side') return { pull: 0, lean: 0 };
+            if (pullupTutorialStep === 'one-side-demo') {
+                const sideEffort = pullupTutorialSide === 'left' ? left : right;
+                return {
+                    pull: 1.7 * sideEffort - .42 - .18 * state.pull,
+                    lean: .7 * (left - right) - 1.1 * state.lean
+                };
+            }
             return {
                 pull: 1.7 * Math.min(left, right) - .42 - .18 * state.pull,
                 lean: .7 * (left - right) - 1.1 * state.lean
@@ -148,8 +157,8 @@ const TASKS = {
             const shoulderY = 280 - amount * 118;
             const shoulder = [centerX, shoulderY];
             const hip = [320 - lean * 18, 412 - amount * 108];
-            const leftShoulder = [centerX - 48, shoulderY + 10 + lean * 22];
-            const rightShoulder = [centerX + 48, shoulderY + 10 - lean * 22];
+            const leftShoulder = [centerX - 48, shoulderY + 10 - lean * 22];
+            const rightShoulder = [centerX + 48, shoulderY + 10 + lean * 22];
             const leftHand = [245, 108];
             const rightHand = [395, 108];
             const leftElbow = elbowPoint(leftShoulder, leftHand, -1);
@@ -357,7 +366,7 @@ const TASKS = {
 const GUIDES = {
     curl: {
         title: 'Elbow flexors: biceps brachii, brachialis, and brachioradialis',
-        text: 'The biceps brachii, brachialis, and brachioradialis all help bend the elbow. The biceps also turns the palm up; the brachialis is a strong flexor in any forearm position; and brachioradialis also assists elbow flexion, with its activity influenced by forearm grip. Q, W, and E activate these muscles separately. R activates the triceps, which straightens the elbow. Keep the upper arm quiet and wrist neutral.',
+        text: 'The biceps brachii, brachialis, and brachioradialis all help bend the elbow. The biceps also turns the palm up; the brachialis is a strong flexor in any forearm position; and brachioradialis also assists elbow flexion, with its activity influenced by forearm grip. Q, W, and E activate these muscles separately. Release the controls to let gravity lower the weight after the curl. Keep the upper arm quiet and wrist neutral.',
         video: 'https://www.youtube.com/results?search_query=ACE+Fitness+bicep+curl+proper+form',
         literature: [
             ['The Role of the Muscle Brachioradialis in Elbow Flexion: An Electromyographic Study', 'https://pubmed.ncbi.nlm.nih.gov/29409427/'],
@@ -405,7 +414,7 @@ const GUIDES = {
 const FORM_STEPS_BY_LEVEL = {
     curl: [
         'CONCENTRIC · Exhale and bend the elbows; keep elbows close to your sides, wrists straight, and shoulders relaxed. Pause at the top without swinging.',
-        'ECCENTRIC · Inhale and lower smoothly until arms are nearly straight; keep control and do not let the weight pull your shoulders forward.'
+        'ECCENTRIC · After reaching the top, release the flexor keys and let gravity lower the weight smoothly; keep control and do not let it pull your shoulders forward.'
     ],
     pullup: [
         'CONCENTRIC · Coordinate A + S on the left with K + L on the right. Use all four groups to pull evenly until both shoulder rings align together.',
@@ -551,6 +560,7 @@ function buildInterface() {
     const hasSideControls = Object.keys(sideControls).length > 0;
     byId('control-help').hidden = !TASK.controlHelp;
     byId('control-help').textContent = TASK.controlHelp || '';
+    byId('level-tutorial').hidden = true;
     byId('side-controls').hidden = !hasSideControls;
     Object.entries(sideControls).forEach(([side, control]) => {
         const button = document.createElement('button');
@@ -592,6 +602,13 @@ function refreshHeldInputs() {
     });
 }
 
+function releaseAllControls() {
+    Object.keys(directHeld).forEach(key => { directHeld[key] = false; });
+    Object.keys(sideHeld).forEach(side => { sideHeld[side] = false; });
+    Object.keys(sideToggled).forEach(side => { sideToggled[side] = false; });
+    refreshHeldInputs();
+}
+
 function setHoldProgress(progress) {
     const percent = Math.round(clamp(progress, 0, 1) * 100);
     byId('hold-fill').style.width = `${percent}%`;
@@ -625,6 +642,8 @@ function reset() {
     phaseStartedAt = null;
     holdingTarget = false;
     completedCheckpoints = 0;
+    pullupTutorialStep = activeLevel === 'pullup' && levelReady ? 'choose-side' : '';
+    pullupTutorialSide = null;
     points = 0;
     accuratePhases = 0;
     byId('stepclock').textContent = '0.0';
@@ -633,6 +652,10 @@ function reset() {
     byId('t').textContent = '0.0';
     byId('goal').textContent = '';
     byId('ov').style.display = 'none';
+    byId('level-tutorial').hidden = true;
+    if (activeLevel === 'pullup' && levelReady) {
+        byId('control-help').textContent = 'Tutorial: choose one side only. Hold A + S for the left or K + L for the right; F or J activates a paired side. Keep the other side off.';
+    }
     for (const key in activation) {
         activation[key] = 0;
         directHeld[key] = false;
@@ -710,6 +733,24 @@ byId('start-level').addEventListener('click', () => {
     levelReady = true;
     byId('intro').hidden = true;
     reset();
+});
+byId('level-tutorial-continue').addEventListener('click', () => {
+    if (activeLevel !== 'pullup' || pullupTutorialStep !== 'explain') return;
+    pullupTutorialStep = 'full-practice';
+    pullupTutorialSide = null;
+    state = TASK.init();
+    stage = 0;
+    Object.keys(activation).forEach(key => {
+        activation[key] = 0;
+        keyMeters[key].style.width = '0%';
+    });
+    phaseStartedAt = null;
+    holdingTarget = false;
+    setHoldProgress(0);
+    byId('stepclock').textContent = '0.0';
+    byId('hold-status').textContent = 'Now coordinate both sides. Hold the shoulder markers inside their rings together for 0.5 seconds.';
+    byId('control-help').textContent = 'The sides mirror each other: A + S on the left, K + L on the right. Or hold F + J for both paired sides. Keep your shoulders level.';
+    byId('level-tutorial').hidden = true;
 });
 addEventListener('keydown', event => {
     if (!levelReady) return;
@@ -1079,7 +1120,27 @@ function frame(now) {
     }
 
     if (levelReady && !completed) {
-        for (let i = 0; i < 2; i++) applyPhysics(state, TASK.torque(state, activation), TASK.config, delta / 2);
+        if (activeLevel === 'pullup' && pullupTutorialStep === 'choose-side') {
+            if (held.a && held.s && !held.k && !held.l) {
+                pullupTutorialSide = 'left';
+                pullupTutorialStep = 'one-side-demo';
+                byId('control-help').textContent = 'Left-side muscles are engaged. Watch one shoulder rise ahead of the other.';
+            } else if (held.k && held.l && !held.a && !held.s) {
+                pullupTutorialSide = 'right';
+                pullupTutorialStep = 'one-side-demo';
+                byId('control-help').textContent = 'Right-side muscles are engaged. Watch one shoulder rise ahead of the other.';
+            }
+        }
+        if (pullupTutorialStep !== 'explain') {
+            for (let i = 0; i < 2; i++) applyPhysics(state, TASK.torque(state, activation), TASK.config, delta / 2);
+        }
+        if (activeLevel === 'pullup' && pullupTutorialStep === 'one-side-demo' && state.pull >= .42) {
+            pullupTutorialStep = 'explain';
+            releaseAllControls();
+            byId('control-help').textContent = 'Paused tutorial: the controls are mirrored. The other side has matching lat and elbow-flexor controls.';
+            byId('level-tutorial-copy').textContent = 'Only one side was active, so your shoulders moved unevenly. The controls are mirrored: A + S on the left match K + L on the right. To complete the Pull-Up, coordinate both sides together and keep the torso level.';
+            byId('level-tutorial').hidden = false;
+        }
         if (startedAt !== null) {
             byId('t').textContent = ((now - startedAt) / 1000).toFixed(1);
             const valid = TASK.stages[stage].isDone(state);
@@ -1126,7 +1187,17 @@ function frame(now) {
     }
 
     const phaseIndex = Math.min(stage, TASK.stages.length - 1);
-    byId('goal').textContent = completed ? '' : `Step ${Math.min(stage + 1, TASK.stages.length)} of ${TASK.stages.length} · ${TASK.stages[phaseIndex].text}`;
+    if (completed) {
+        byId('goal').textContent = '';
+    } else if (activeLevel === 'pullup' && pullupTutorialStep === 'choose-side') {
+        byId('goal').textContent = 'Tutorial · Start with one side only.';
+    } else if (activeLevel === 'pullup' && pullupTutorialStep === 'one-side-demo') {
+        byId('goal').textContent = 'Tutorial · Notice how one-sided effort tilts the shoulders.';
+    } else if (activeLevel === 'pullup' && pullupTutorialStep === 'explain') {
+        byId('goal').textContent = 'Tutorial paused · Continue when you are ready to coordinate both sides.';
+    } else {
+        byId('goal').textContent = `Step ${Math.min(stage + 1, TASK.stages.length)} of ${TASK.stages.length} · ${TASK.stages[phaseIndex].text}`;
+    }
     render();
     requestAnimationFrame(frame);
 }
