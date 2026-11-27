@@ -64,6 +64,9 @@ body {
 .level-picker { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 22px }
 .level-option { padding: 7px 12px; border-radius: 999px; color: var(--mut); font-size: 12px }
 .level-option.is-active { border-color: var(--act); color: var(--fg); background: color-mix(in srgb, var(--act) 12%, var(--card)) }
+.level-option--disabled,
+.level-option--disabled:disabled { cursor: not-allowed; opacity: .72; border-style: dashed }
+.coming-soon-tag { display: inline-block; margin-left: 5px; padding: 2px 5px; border-radius: 999px; color: var(--bg); background: var(--act); font-size: 8px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; white-space: nowrap }
 .intro-card h1 { margin-bottom: 10px; font-size: clamp(28px, 6vw, 40px) }
 .intro-card h1::after { margin: 9px auto 0 }
 .intro-copy { max-width: 520px; margin: 0 auto 18px; color: var(--mut); line-height: 1.65 }

@@ -1,6 +1,23 @@
 # Changelog
 
-Notable changes to the Muscle Mechanics game are recorded here, from the initial scaffold through the current single-level release.
+Notable changes to the Muscle Mechanics game are recorded here, from the initial scaffold through the current five-level prototype.
+
+## 2026-11-26
+
+- Added Squat, Bench Press, and Deadlift level prototypes. Squat and Deadlift are currently disabled in the picker and marked “Coming Soon.”
+- Reworked the Bicep Curl into a guided tutorial: players first try the biceps alone, observe the partial movement, release to lower during the tutorial demonstration, then coordinate the elbow flexors. The curl uses biceps brachii, brachialis, and brachioradialis controls; triceps is not a curl control.
+- In the standard Curl level, gravity-driven lowering now unlocks after the player completes the top checkpoint hold.
+- Added a Pull-Up tutorial that demonstrates one side before explaining mirrored controls and bilateral coordination.
+- Added an in-game tutorial pause overlay. Movement, muscle activation, hold progress, and elapsed time pause until the player continues.
+- Simplified the level picker and gameplay prompts, collapsed exercise notes and research links, and added the latest commit ID and date/time to the page.
+
+## 2026-11-20
+
+- Refined the avatar visuals and corrected Pull-Up muscle labels.
+
+## 2026-11-17
+
+- Added the back-view Pull-Up level with left/right muscle controls and bilateral shoulder checkpoints.
 
 ## 2026-11-09
 

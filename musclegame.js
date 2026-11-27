@@ -112,7 +112,12 @@ const TASKS = {
         ],
         init: () => ({ flex: 0 }),
         config: { flex: [7, 3, 0, 2.6] },
-        torque: (state, activation) => ({ flex: .45 * activation.q + .8 * activation.w + .65 * activation.e - .55 * sin(state.flex) }),
+        torque: (state, activation) => {
+            const teachingGravity = ['biceps-only', 'solo-return'].includes(curlTutorialStep);
+            const loweringUnlocked = stage > 0 || teachingGravity;
+            const gravity = loweringUnlocked ? .55 * sin(state.flex) : 0;
+            return { flex: .5 * activation.q + .8 * activation.w + .65 * activation.e - gravity };
+        },
         pose(state) {
             const body = standingPose();
             const shoulder = body.shoulder;
@@ -732,6 +737,7 @@ function renderPreview(levelId) {
 
 function selectLevel(levelId) {
     if (!TASKS[levelId]) return;
+    if (document.querySelector(`.level-option[data-level="${levelId}"]`)?.disabled) return;
     activeLevel = levelId;
     TASK = TASKS[levelId];
     GUIDE = GUIDES[levelId];
@@ -1186,7 +1192,7 @@ function frame(now) {
         if (!isTutorialPaused()) {
             for (let i = 0; i < 2; i++) applyPhysics(state, TASK.torque(state, activation), TASK.config, delta / 2);
         }
-        if (activeLevel === 'curl' && curlTutorialStep === 'biceps-only' && state.flex >= 1.05) {
+        if (activeLevel === 'curl' && curlTutorialStep === 'biceps-only' && state.flex >= .9) {
             curlTutorialStep = 'explain-solo';
             releaseAllControls();
             showTutorialPause('Pause · Biceps alone', 'In this game’s simplified model, Q moves the curl partway. Continue, then release Q and watch gravity lower the arm.', now);
