@@ -19,12 +19,16 @@
             <div class="level-picker" role="group" aria-label="Choose a level">
                 <button class="level-option is-active" type="button" data-level="curl" aria-pressed="true">Level 1 · Bicep Curl</button>
                 <button class="level-option" type="button" data-level="pullup" aria-pressed="false">Level 2 · Pull-Up</button>
+                <button class="level-option" type="button" data-level="squat" aria-pressed="false">Level 3 · Squat</button>
+                <button class="level-option" type="button" data-level="bench" aria-pressed="false">Level 4 · Bench Press</button>
+                <button class="level-option" type="button" data-level="deadlift" aria-pressed="false">Level 5 · Deadlift</button>
             </div>
             <p id="intro-kicker" class="intro-kicker">Level 1 · Movement preview</p>
             <h1 id="intro-title">Bicep Curl</h1>
             <p id="intro-copy" class="intro-copy"></p>
             <div id="motion-demo" class="motion-demo" role="img" aria-label=""></div>
             <p id="intro-hint" class="intro-hint"></p>
+            <section id="intro-literature" class="intro-literature" aria-label="Research references"></section>
             <button id="start-level" class="start-level" type="button">Start Level 1</button>
         </div>
     </section>
@@ -43,7 +47,17 @@
             <canvas id="c" width="640" height="540"></canvas>
             <div class="hud">
                 <div class="goal" id="goal"></div>
-                <div><b id="t">0.0</b>s · <span id="stepclock">0.0</span>s step</div>
+                <div class="timers">
+                    <div class="timer">
+                        <span>Total elapsed</span>
+                        <b><span id="t">0.0</span>s</b>
+                        <small>includes pauses</small>
+                    </div>
+                    <div class="timer">
+                        <span>Target hold</span>
+                        <b><span id="stepclock">0.0</span><small> / 0.5 s</small></b>
+                    </div>
+                </div>
             </div>
             <div id="ov">
                 <div class="m" id="med"></div>
@@ -52,7 +66,15 @@
                 <div class="row"><button id="retry">Play again</button><button id="choose-level" type="button">Choose level</button></div>
             </div>
                 </div>
+                <div class="hold-feedback">
+                    <p id="hold-status" role="status" aria-live="polite">Reach the target ring and hold steady for 0.5 seconds.</p>
+                    <div class="hold-track" role="progressbar" aria-label="Target hold progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <span id="hold-fill"></span>
+                    </div>
+                </div>
+                <div id="control-help" class="control-help" hidden></div>
                 <div class="keys" id="keys"></div>
+                <div id="side-controls" class="side-controls" hidden></div>
                 <div class="medals" id="info"></div>
             </section>
 

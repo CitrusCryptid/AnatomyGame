@@ -93,6 +93,12 @@ body {
 .extension-label { left: 14px }
 .flexion-label { right: 14px; color: var(--act); animation-delay: 1.4s }
 .intro-hint { margin: 14px 0 18px; color: var(--mut); font-size: 13px }
+.intro-literature { max-width: 540px; margin: 0 auto 20px; text-align: left; font-size: 12px; line-height: 1.5 }
+.intro-literature h2 { margin: 0 0 8px; font-size: 15px; text-align: center }
+.intro-literature ul { margin: 0; padding-left: 20px }
+.intro-literature li + li { margin-top: 6px }
+.intro-literature a { color: var(--act); text-decoration-thickness: 1px; text-underline-offset: 3px }
+.intro-literature p { margin: 10px 0 0; color: var(--mut); font-size: 11px }
 
 .start-level {
     min-height: 46px;
@@ -117,6 +123,15 @@ body {
 .demo-pullup-label { fill: var(--mus) }
 .demo-pullup-flexor-label { fill: var(--act) }
 .demo-pullup-body { transform-box: view-box; animation: pullup-preview 2.8s ease-in-out infinite }
+.demo-bar { stroke: var(--line); stroke-width: 7; stroke-linecap: round }
+.demo-plate { fill: var(--mus); stroke: var(--act); stroke-width: 2 }
+.demo-squat-figure, .demo-squat-bar { transform-box: view-box; transform-origin: center 130px; animation: squat-preview 2.8s ease-in-out infinite }
+.demo-bench { stroke: var(--line); stroke-width: 8; stroke-linecap: round }
+.demo-bench-leg { fill: none; stroke: var(--line); stroke-width: 8; stroke-linecap: round }
+.demo-bench-pad, .demo-bench-body { fill: none; stroke: var(--skin2); stroke-width: 22; stroke-linecap: round }
+.demo-bench-arms, .demo-bench-bar { transform-box: view-box; transform-origin: 220px 145px; animation: bench-preview 2.8s ease-in-out infinite }
+.demo-deadlift-body { transform-box: view-box; transform-origin: center 145px; animation: deadlift-preview 2.8s ease-in-out infinite }
+.demo-deadlift-bar { animation: deadlift-bar-preview 2.8s ease-in-out infinite }
 
 @keyframes pullup-preview {
     0%, 14%, 86%, 100% { transform: translateY(0) }
@@ -128,13 +143,33 @@ body {
     45%, 58% { transform: rotate(-105deg) }
 }
 
+@keyframes squat-preview {
+    0%, 12%, 88%, 100% { transform: translateY(0) scaleY(1) }
+    45%, 58% { transform: translateY(22px) scaleY(.86) }
+}
+
+@keyframes bench-preview {
+    0%, 12%, 88%, 100% { transform: translateY(32px) }
+    45%, 58% { transform: translateY(-24px) }
+}
+
+@keyframes deadlift-preview {
+    0%, 12%, 88%, 100% { transform: translateY(28px) rotate(10deg) }
+    45%, 58% { transform: translateY(-20px) rotate(0) }
+}
+
+@keyframes deadlift-bar-preview {
+    0%, 12%, 88%, 100% { transform: translateY(0) }
+    45%, 58% { transform: translateY(-52px) }
+}
+
 @keyframes label-pulse {
     0%, 42%, 100% { opacity: .45 }
     48%, 88% { opacity: 1 }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .demo-forearm, .demo-pullup-body, .motion-label { animation: none }
+    .demo-forearm, .demo-pullup-body, .demo-squat-figure, .demo-squat-bar, .demo-bench-arms, .demo-bench-bar, .demo-deadlift-body, .demo-deadlift-bar, .motion-label { animation: none }
     .motion-label { opacity: 1 }
 }
 
@@ -261,6 +296,7 @@ canvas {
     left: 12px;
     right: 12px;
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
     font-size: 14px;
@@ -273,8 +309,29 @@ canvas {
 }
 
 .goal {
+    flex: 1 1 auto;
+    max-width: 60%;
     color: var(--mut)
 }
+
+.timers { display: flex; flex: 0 0 auto; gap: 10px; text-align: right }
+.timer { display: grid; gap: 1px; min-width: 76px; padding: 5px 8px; background: color-mix(in srgb, var(--bg) 82%, transparent); border: 1px solid var(--line); border-radius: 7px }
+.timer > span, .timer > small { color: var(--mut); font-size: 10px; line-height: 1.2 }
+.timer b { font-size: 16px; line-height: 1.15 }
+.timer b small { color: var(--mut); font-size: 10px; font-weight: 500 }
+
+.hold-feedback { margin-top: 9px; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 8px }
+.hold-feedback p { margin: 0 0 7px; color: var(--fg); font-size: 12px; line-height: 1.4 }
+.hold-track { height: 11px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); border-radius: 999px }
+.hold-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--ok); transition: width 80ms linear }
+
+.control-help { margin-top: 10px; padding: 10px 12px; color: var(--fg); background: color-mix(in srgb, var(--act) 8%, var(--card)); border: 1px solid color-mix(in srgb, var(--act) 45%, var(--line)); border-radius: 8px; font-size: 12px; line-height: 1.5 }
+.control-help[hidden], .side-controls[hidden] { display: none }
+.side-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px }
+.side-control { flex: 1 1 180px; display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; text-align: left; padding: 9px 10px; border-color: var(--line) }
+.side-control .cap { grid-row: span 2; display: inline-grid; min-width: 30px; min-height: 30px; place-items: center; border: 1px solid var(--fg); border-radius: 6px; font-weight: 700 }
+.side-control small { color: var(--mut); font-size: 11px }
+.side-control.is-held { border-color: var(--act); background: color-mix(in srgb, var(--act) 13%, var(--card)) }
 
 /* Cover the stage with the results panel after a movement ends. */
 #ov {
@@ -319,8 +376,13 @@ canvas {
     overflow: hidden;
     user-select: none;
     touch-action: none;
-    cursor: pointer
+    cursor: pointer;
+    text-align: left
 }
+.key.is-held, .key.is-active { border-color: var(--act); background: color-mix(in srgb, var(--act) 12%, var(--card)) }
+.key:focus-visible, .side-control:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px }
+.key-side { display: block; margin-bottom: 4px; color: var(--act); font-size: 9px; font-weight: 700; letter-spacing: .1em }
+.key-state { display: block; margin-top: 5px; color: var(--act); font-size: 10px; font-weight: 700 }
 
 .key .cap {
     display: inline-block;
@@ -364,4 +426,13 @@ canvas {
 @media (max-width: 680px) {
     .workspace { grid-template-columns: minmax(0, 1fr); gap: 12px }
     .overview { height: auto; overflow: visible }
+}
+
+@media (max-width: 480px) {
+    .hud { left: 8px; right: 8px; gap: 5px }
+    .goal { max-width: 48%; font-size: 11px; line-height: 1.25 }
+    .timers { gap: 4px }
+    .timer { min-width: 62px; padding: 4px 5px }
+    .timer > span, .timer > small { font-size: 9px }
+    .timer b { font-size: 14px }
 }
