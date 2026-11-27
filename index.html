@@ -17,18 +17,20 @@
     <section id="intro" class="intro-screen" aria-labelledby="intro-title">
         <div class="intro-card">
             <div class="level-picker" role="group" aria-label="Choose a level">
-                <button class="level-option is-active" type="button" data-level="curl" aria-pressed="true">Level 1 · Bicep Curl</button>
-                <button class="level-option" type="button" data-level="pullup" aria-pressed="false">Level 2 · Pull-Up</button>
-                <button class="level-option" type="button" data-level="squat" aria-pressed="false">Level 3 · Squat</button>
-                <button class="level-option" type="button" data-level="bench" aria-pressed="false">Level 4 · Bench Press</button>
-                <button class="level-option" type="button" data-level="deadlift" aria-pressed="false">Level 5 · Deadlift</button>
+                <button class="level-option is-active" type="button" data-level="curl" aria-pressed="true">1 · Curl</button>
+                <button class="level-option" type="button" data-level="pullup" aria-pressed="false">2 · Pull-Up</button>
+                <button class="level-option" type="button" data-level="squat" aria-pressed="false">3 · Squat</button>
+                <button class="level-option" type="button" data-level="bench" aria-pressed="false">4 · Bench</button>
+                <button class="level-option" type="button" data-level="deadlift" aria-pressed="false">5 · Deadlift</button>
             </div>
             <p id="intro-kicker" class="intro-kicker">Level 1 · Movement preview</p>
             <h1 id="intro-title">Bicep Curl</h1>
             <p id="intro-copy" class="intro-copy"></p>
             <div id="motion-demo" class="motion-demo" role="img" aria-label=""></div>
-            <p id="intro-hint" class="intro-hint"></p>
-            <section id="intro-literature" class="intro-literature" aria-label="Research references"></section>
+            <p id="intro-hint" class="intro-hint" hidden></p>
+            <details class="intro-sources"><summary>Research</summary>
+                <section id="intro-literature" class="intro-literature" aria-label="Research references"></section>
+            </details>
             <button id="start-level" class="start-level" type="button">Start Level 1</button>
         </div>
     </section>
@@ -36,8 +38,6 @@
         <header class="page-header">
             <div>
                 <h1>Muscle Mechanics</h1>
-                <p class="sub">Hold each muscle’s key to contract it. Gravity never stops pulling, so choose the right muscles
-                    at the right time.</p>
             </div>
             <p id="current-level" class="level-label">Level 1 · Bicep Curl</p>
         </header>
@@ -51,7 +51,7 @@
                     <div class="timer">
                         <span>Total elapsed</span>
                         <b><span id="t">0.0</span>s</b>
-                        <small>includes pauses</small>
+                        <small>stops during tutorial pauses</small>
                     </div>
                     <div class="timer">
                         <span>Target hold</span>
@@ -59,6 +59,14 @@
                     </div>
                 </div>
             </div>
+            <section id="level-tutorial" class="level-tutorial" role="dialog" aria-modal="true" aria-labelledby="level-tutorial-title" aria-describedby="level-tutorial-copy" hidden>
+                <div class="pause-card">
+                    <p class="pause-label">PAUSED · TUTORIAL</p>
+                    <h2 id="level-tutorial-title">Notice the movement</h2>
+                    <p id="level-tutorial-copy"></p>
+                    <button id="level-tutorial-continue" type="button">Continue</button>
+                </div>
+            </section>
             <div id="ov">
                 <div class="m" id="med"></div>
                 <h2 id="mt" style="margin:0"></h2>
@@ -73,16 +81,13 @@
                     </div>
                 </div>
                 <div id="control-help" class="control-help" hidden></div>
-                <div id="level-tutorial" class="level-tutorial" hidden>
-                    <p id="level-tutorial-copy"></p>
-                    <button id="level-tutorial-continue" type="button">Continue</button>
-                </div>
                 <div class="keys" id="keys"></div>
                 <div id="side-controls" class="side-controls" hidden></div>
                 <div class="medals" id="info"></div>
             </section>
 
-            <aside id="overview" class="overview" aria-live="polite" aria-label="Exercise guide">
+            <details id="overview" class="overview">
+                <summary>Exercise guide and anatomy</summary>
                 <h2>Elbow flexors: biceps brachii, brachialis, and brachioradialis</h2>
                 <p>These muscles bend the elbow. The biceps also turns the palm up and assists shoulder flexion; the brachialis is a strong elbow flexor in any hand position. The triceps straightens the elbow. Keep the upper arm quiet and wrist neutral to control both lifting and lowering.</p>
                 <p><b>Movement checkpoints</b></p>
@@ -91,9 +96,14 @@
                     <li>ECCENTRIC · Inhale and lower smoothly until arms are nearly straight; keep control and do not let the weight pull your shoulders forward.</li>
                 </ol>
                 <p><a target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=ACE+Fitness+bicep+curl+proper+form">Watch an instructional video ↗</a></p>
-            </aside>
+            </details>
         </div>
+        <footer class="build-stamp" aria-label="Latest game commit">
+            <span>Latest commit <code id="commit-id">Loading…</code></span>
+            <time id="commit-time">Checking commit date…</time>
+        </footer>
     </main>
+        <script src="commit-stamp.js" defer></script>
         <script src="musclegame.js" defer></script>
 </body>
 

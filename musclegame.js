@@ -85,10 +85,26 @@ function muscleGroupScore(keys, activation) {
 
 let pullupTutorialStep = '';
 let pullupTutorialSide = null;
+let curlTutorialStep = '';
+let tutorialPauseStartedAt = null;
+
+function isTutorialPaused() {
+    return ['explain-solo', 'explain-combine'].includes(curlTutorialStep) || pullupTutorialStep === 'explain';
+}
+
+function showTutorialPause(title, copy, now) {
+    tutorialPauseStartedAt = now;
+    byId('level-tutorial-title').textContent = title;
+    byId('level-tutorial-copy').textContent = copy;
+    byId('level-tutorial-continue').textContent = 'Continue';
+    byId('level-tutorial').hidden = false;
+    byId('level-tutorial-continue').focus();
+}
 
 const TASKS = {
     curl: {
         name: 'Bicep curl',
+        controlHelp: 'Tutorial · Start with Q only.',
         muscles: [
             ['q', 'Biceps brachii', 'Bends elbow'],
             ['w', 'Brachialis', 'Primary elbow flexor'],
@@ -124,8 +140,8 @@ const TASKS = {
             left: { key: 'f', label: 'Left side', muscles: ['a', 's'] },
             right: { key: 'j', label: 'Right side', muscles: ['k', 'l'] }
         },
-        controlHelp: 'Tutorial: choose one side only. Hold A + S for the left or K + L for the right; F or J activates a paired side. Keep the other side off.',
-        holdHint: 'Both shoulder markers must be inside their rings at the same time, with your torso level. Hold that position for 0.5 seconds; leaving either ring resets progress. Centered alignment and all four active muscles earn the highest score.',
+        controlHelp: 'Tutorial · Choose one side first.',
+        holdHint: 'Both shoulder rings together · keep level · hold 0.5s',
         muscles: [
             ['a', 'Left latissimus dorsi', 'Pulls the upper arm down'],
             ['s', 'Left elbow flexors', 'Biceps + brachialis'],
@@ -445,35 +461,35 @@ const LEVEL_INFO = {
 const PREVIEWS = {
     curl: {
         title: 'Bicep Curl',
-        copy: 'Watch the elbow move before you begin. This level practices elbow flexion to curl the weight and elbow extension to lower it with control.',
+        copy: 'Watch the elbow bend, then straighten.',
         hint: 'The upper arm stays quiet while the forearm bends and straightens.',
         aria: 'An animated arm repeatedly bends at the elbow, then straightens',
         markup: '<span class="motion-label extension-label">ELBOW EXTENSION</span><span class="motion-label flexion-label">ELBOW FLEXION</span><svg viewBox="0 0 320 230" aria-hidden="true" focusable="false"><line x1="20" y1="205" x2="300" y2="205" class="demo-floor"/><circle cx="112" cy="48" r="23" class="demo-skin"/><path d="M112 74 L112 150" class="demo-torso"/><path d="M112 148 L78 200 M112 148 L145 200" class="demo-legs"/><path d="M112 84 L160 145" class="demo-upper-arm"/><circle cx="160" cy="145" r="8" class="demo-joint"/><g class="demo-forearm"><path d="M160 145 L247 145" class="demo-limb"/><circle cx="247" cy="145" r="7" class="demo-hand"/></g><path d="M157 116 A33 33 0 0 1 189 139" class="demo-arrow"/><path d="M183 134 L190 140 L181 142" class="demo-arrow-head"/></svg>'
     },
     pullup: {
         title: 'Pull-Up',
-        copy: 'Watch the back view as the lats and elbow flexors work together to pull the body toward the bar, then lower it again.',
+        copy: 'Watch the back rise toward the bar, then lower.',
         hint: 'Watch how the shoulder markers move together. After the level starts, explore the controls shown below the avatar.',
         aria: 'A back-view figure moves upward toward a pull-up bar and lowers again',
         markup: '<span class="motion-label extension-label">PULL UP</span><span class="motion-label flexion-label">LOWER</span><svg viewBox="0 0 360 220" aria-hidden="true" focusable="false"><line x1="68" y1="20" x2="292" y2="20" class="demo-pullup-bar"/><path d="M133 87 L105 63 L101 20 M227 87 L255 63 L259 20" class="demo-pullup-limb"/><g class="demo-pullup-body"><circle cx="180" cy="54" r="19" class="demo-pullup-head"/><ellipse cx="141" cy="87" rx="20" ry="17" class="demo-pullup-shoulder"/><ellipse cx="219" cy="87" rx="20" ry="17" class="demo-pullup-shoulder"/><path d="M143 78 Q180 66 217 78 L229 130 Q180 150 131 130 Z" class="demo-pullup-torso"/><path d="M131 128 Q150 137 169 135 L165 184 L145 184 Z M191 135 Q210 137 229 128 L215 184 L195 184 Z" class="demo-pullup-legs"/><path d="M151 89 Q160 103 173 124 L161 130 Q147 111 139 98 Z M209 89 Q200 103 187 124 L199 130 Q213 111 221 98 Z" class="demo-pullup-lats"/></g><circle cx="105" cy="63" r="8" class="demo-pullup-elbow"/><circle cx="255" cy="63" r="8" class="demo-pullup-elbow"/><text x="26" y="143" class="demo-pullup-label">LATS</text><text x="334" y="143" text-anchor="end" class="demo-pullup-label">LATS</text><text x="84" y="83" text-anchor="end" class="demo-pullup-flexor-label">ELBOW FLEXORS</text><text x="276" y="83" class="demo-pullup-flexor-label">ELBOW FLEXORS</text></svg>'
     },
     squat: {
         title: 'Squat',
-        copy: 'Watch the hips and knees bend together, then extend to return to standing.',
+        copy: 'Watch the hips and knees bend, then stand.',
         hint: 'Quadriceps, gluteals, hamstrings, and trunk stabilizers contribute across the movement.',
         aria: 'A figure with a barbell lowers into a squat and stands back up',
         markup: '<span class="motion-label extension-label">LOWER</span><span class="motion-label flexion-label">STAND</span><svg viewBox="0 0 360 220" aria-hidden="true" focusable="false"><line x1="20" y1="205" x2="340" y2="205" class="demo-floor"/><g class="demo-squat-bar"><line x1="66" y1="53" x2="294" y2="53" class="demo-pullup-bar"/><line x1="116" y1="48" x2="246" y2="48" class="demo-bar"/><circle cx="112" cy="48" r="13" class="demo-plate"/><circle cx="250" cy="48" r="13" class="demo-plate"/></g><g class="demo-squat-figure"><circle cx="180" cy="56" r="18" class="demo-skin"/><path d="M180 76 L184 132" class="demo-torso"/><path d="M182 91 L128 53 M182 91 L232 53" class="demo-upper-arm"/><path d="M184 130 L138 160 L132 195 M184 130 L220 160 L228 195" class="demo-limb"/><circle cx="184" cy="130" r="7" class="demo-joint"/></g></svg>'
     },
     bench: {
         title: 'Bench Press',
-        copy: 'From a stable position on the bench, press the bar away from the chest, then lower it with control.',
+        copy: 'Watch the bar press up, then return to the chest.',
         hint: 'Pectoralis major, triceps, and anterior deltoids contribute to the press.',
         aria: 'A figure lying on a bench presses a bar upward and lowers it',
         markup: '<span class="motion-label extension-label">PRESS</span><span class="motion-label flexion-label">LOWER</span><svg viewBox="0 0 360 220" aria-hidden="true" focusable="false"><line x1="40" y1="174" x2="316" y2="174" class="demo-bench"/><path d="M84 171 L104 204 M280 171 L260 204" class="demo-bench-leg"/><path d="M90 159 L262 159" class="demo-bench-pad"/><path d="M120 145 L244 145" class="demo-bench-body"/><circle cx="263" cy="141" r="17" class="demo-skin"/><g class="demo-bench-arms"><path d="M239 143 L221 105 L193 72 M239 143 L226 105 L204 72" class="demo-limb"/></g><g class="demo-bench-bar"><line x1="150" y1="70" x2="265" y2="70" class="demo-bar"/><circle cx="147" cy="70" r="12" class="demo-plate"/><circle cx="268" cy="70" r="12" class="demo-plate"/></g></svg>'
     },
     deadlift: {
         title: 'Deadlift',
-        copy: 'Watch the hips and knees extend together as the bar travels close to the body; reverse the hinge to lower it.',
+        copy: 'Watch the bar rise close to the body, then lower.',
         hint: 'Quadriceps, gluteals, hamstrings, spinal extensors, and lats contribute to the lift.',
         aria: 'A figure hinges to lift a bar from the floor, stands, and lowers it again',
         markup: '<span class="motion-label extension-label">STAND</span><span class="motion-label flexion-label">HINGE</span><svg viewBox="0 0 360 220" aria-hidden="true" focusable="false"><line x1="20" y1="205" x2="340" y2="205" class="demo-floor"/><g class="demo-deadlift-body"><circle cx="181" cy="70" r="18" class="demo-skin"/><path d="M181 89 L205 137" class="demo-torso"/><path d="M205 137 L153 163 L146 194 M205 137 L229 165 L236 194" class="demo-limb"/><path d="M189 101 L225 150 M197 112 L232 153" class="demo-limb"/></g><g class="demo-deadlift-bar"><line x1="102" y1="190" x2="270" y2="190" class="demo-bar"/><circle cx="98" cy="190" r="13" class="demo-plate"/><circle cx="274" cy="190" r="13" class="demo-plate"/></g></svg>'
@@ -530,7 +546,7 @@ function buildInterface() {
         card.innerHTML = `${TASK.keySide?.[key] ? `<span class="key-side">${TASK.keySide[key]}</span>` : ''}<span class="cap">${key.toUpperCase()}</span><b>${name}</b><small>${role}</small><span class="key-state">Ready</span><i></i>`;
         const press = event => {
             event.preventDefault();
-            if (!levelReady) return;
+            if (!levelReady || isTutorialPaused()) return;
             directHeld[key] = true;
             refreshHeldInputs();
             begin();
@@ -543,7 +559,7 @@ function buildInterface() {
         card.addEventListener('pointerdown', press);
         ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(event => card.addEventListener(event, release));
         card.addEventListener('click', event => {
-            if (event.detail !== 0 || !levelReady) return;
+            if (event.detail !== 0 || !levelReady || isTutorialPaused()) return;
             directHeld[key] = !directHeld[key];
             refreshHeldInputs();
             if (directHeld[key]) begin();
@@ -569,6 +585,7 @@ function buildInterface() {
         button.setAttribute('aria-pressed', 'false');
         button.innerHTML = `<span class="cap">${control.key.toUpperCase()}</span><b>${control.label}</b><small>Toggle ${control.muscles.map(key => TASK.muscles.find(muscle => muscle[0] === key)?.[1]).join(' + ')}</small>`;
         button.addEventListener('click', () => {
+            if (isTutorialPaused()) return;
             sideToggled[side] = !sideToggled[side];
             refreshHeldInputs();
             if (sideToggled[side]) begin();
@@ -579,9 +596,9 @@ function buildInterface() {
         sideToggled[side] = false;
     });
 
-    byId('overview').innerHTML = `<h2>${GUIDE.title}</h2><p>${GUIDE.text}</p><p><b>Movement checkpoints</b></p><ol>${FORM_STEPS.map(step => `<li>${step}</li>`).join('')}</ol><p><a target="_blank" rel="noopener" href="${GUIDE.video}">Watch an instructional video ↗</a></p>`;
+    byId('overview').innerHTML = `<summary>Muscles & anatomy</summary><h2>${GUIDE.title}</h2><p>${GUIDE.text}</p><p><a target="_blank" rel="noopener" href="${GUIDE.video}">More about this exercise ↗</a></p>`;
     const best = bestScores[activeLevel];
-    byId('info').textContent = `Reach the target ring and hold for 0.5 seconds; progress resets when you leave it. Total elapsed time includes pauses.${best ? ` · Best form score: ${best}/100` : ''}`;
+    byId('info').textContent = best ? `Best form: ${best}/100` : '';
 }
 
 function refreshHeldInputs() {
@@ -644,17 +661,22 @@ function reset() {
     completedCheckpoints = 0;
     pullupTutorialStep = activeLevel === 'pullup' && levelReady ? 'choose-side' : '';
     pullupTutorialSide = null;
+    curlTutorialStep = activeLevel === 'curl' && levelReady ? 'choose-biceps' : '';
+    tutorialPauseStartedAt = null;
     points = 0;
     accuratePhases = 0;
     byId('stepclock').textContent = '0.0';
     setHoldProgress(0);
-    byId('hold-status').textContent = TASK.holdHint || 'Reach the target ring and hold steady for 0.5 seconds. Progress resets if you leave the ring.';
+    byId('hold-status').textContent = TASK.holdHint || 'Reach ring · hold 0.5s';
     byId('t').textContent = '0.0';
     byId('goal').textContent = '';
     byId('ov').style.display = 'none';
     byId('level-tutorial').hidden = true;
-    if (activeLevel === 'pullup' && levelReady) {
-        byId('control-help').textContent = 'Tutorial: choose one side only. Hold A + S for the left or K + L for the right; F or J activates a paired side. Keep the other side off.';
+    tutorialPauseStartedAt = null;
+    if (levelReady && activeLevel === 'curl') {
+        byId('control-help').textContent = 'Tutorial · Start with Q only.';
+    } else if (activeLevel === 'pullup' && levelReady) {
+        byId('control-help').textContent = 'Tutorial · Choose one side first.';
     }
     for (const key in activation) {
         activation[key] = 0;
@@ -680,7 +702,7 @@ function finish() {
     byId('t').textContent = seconds.toFixed(1);
     byId('med').textContent = ['🥇', '🥈', '🥉', '—'][medalIndex];
     byId('mt').textContent = ['Gold!', 'Silver', 'Bronze', 'No medal'][medalIndex];
-    byId('mi').textContent = `${points}/100 form points · ${accuratePhases}/2 accurate phases · ${seconds.toFixed(1)}s total. Medals reward controlled, accurate form.`;
+    byId('mi').textContent = `${points}/100 · ${accuratePhases}/2 holds · ${seconds.toFixed(1)}s`;
 
     if (!bestScores[activeLevel] || points > bestScores[activeLevel]) {
         bestScores[activeLevel] = points;
@@ -735,25 +757,50 @@ byId('start-level').addEventListener('click', () => {
     reset();
 });
 byId('level-tutorial-continue').addEventListener('click', () => {
-    if (activeLevel !== 'pullup' || pullupTutorialStep !== 'explain') return;
-    pullupTutorialStep = 'full-practice';
-    pullupTutorialSide = null;
-    state = TASK.init();
-    stage = 0;
+    if (!isTutorialPaused()) return;
+    const pausedFor = tutorialPauseStartedAt === null ? 0 : performance.now() - tutorialPauseStartedAt;
+    if (startedAt !== null) startedAt += pausedFor;
+    if (phaseStartedAt !== null) phaseStartedAt += pausedFor;
+    tutorialPauseStartedAt = null;
+    releaseAllControls();
+    if (activeLevel === 'curl' && curlTutorialStep === 'explain-solo') {
+        curlTutorialStep = 'solo-return';
+        byId('control-help').textContent = 'Release Q · Watch the arm lower.';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'explain-combine') {
+        curlTutorialStep = 'full-practice';
+        state = TASK.init();
+        stage = 0;
+        phaseStartedAt = null;
+        holdingTarget = false;
+        byId('stepclock').textContent = '0.0';
+        setHoldProgress(0);
+        byId('hold-status').textContent = 'Reach the ring · hold 0.5s';
+        byId('control-help').textContent = 'Q + W/E · Reach the top, then release to lower.';
+    } else if (activeLevel === 'pullup' && pullupTutorialStep === 'explain') {
+        pullupTutorialStep = 'full-practice';
+        pullupTutorialSide = null;
+        state = TASK.init();
+        stage = 0;
+        phaseStartedAt = null;
+        holdingTarget = false;
+        setHoldProgress(0);
+        byId('stepclock').textContent = '0.0';
+        byId('hold-status').textContent = 'Both shoulder rings · hold 0.5s';
+        byId('control-help').textContent = 'Both sides · A/S + K/L · Stay level.';
+    }
     Object.keys(activation).forEach(key => {
         activation[key] = 0;
         keyMeters[key].style.width = '0%';
     });
-    phaseStartedAt = null;
-    holdingTarget = false;
-    setHoldProgress(0);
-    byId('stepclock').textContent = '0.0';
-    byId('hold-status').textContent = 'Now coordinate both sides. Hold the shoulder markers inside their rings together for 0.5 seconds.';
-    byId('control-help').textContent = 'The sides mirror each other: A + S on the left, K + L on the right. Or hold F + J for both paired sides. Keep your shoulders level.';
     byId('level-tutorial').hidden = true;
+    keyCards[Object.keys(keyCards)[0]]?.focus();
 });
 addEventListener('keydown', event => {
     if (!levelReady) return;
+    if (isTutorialPaused()) {
+        if (!['Tab', 'Enter', ' '].includes(event.key)) event.preventDefault();
+        return;
+    }
     if (event.code === 'Space') {
         if (event.target.closest?.('.key, .side-control')) return;
         event.preventDefault();
@@ -1106,9 +1153,10 @@ let lastFrame = performance.now();
 function frame(now) {
     const delta = Math.min(.033, (now - lastFrame) / 1000);
     lastFrame = now;
+    const paused = isTutorialPaused();
 
     for (const key in activation) {
-        activation[key] += ((levelReady && held[key] ? 1 : 0) - activation[key]) * Math.min(1, delta * 10);
+        if (!paused) activation[key] += ((levelReady && held[key] ? 1 : 0) - activation[key]) * Math.min(1, delta * 10);
         keyMeters[key].style.width = `${activation[key] * 100}%`;
         const card = keyCards[key];
         if (card) {
@@ -1120,35 +1168,47 @@ function frame(now) {
     }
 
     if (levelReady && !completed) {
+        if (activeLevel === 'curl' && curlTutorialStep === 'choose-biceps' && held.q && !held.w && !held.e) {
+            curlTutorialStep = 'biceps-only';
+            byId('control-help').textContent = 'Q only · Watch the arm move.';
+        }
         if (activeLevel === 'pullup' && pullupTutorialStep === 'choose-side') {
             if (held.a && held.s && !held.k && !held.l) {
                 pullupTutorialSide = 'left';
                 pullupTutorialStep = 'one-side-demo';
-                byId('control-help').textContent = 'Left-side muscles are engaged. Watch one shoulder rise ahead of the other.';
+                byId('control-help').textContent = 'Left side · Watch the shoulders.';
             } else if (held.k && held.l && !held.a && !held.s) {
                 pullupTutorialSide = 'right';
                 pullupTutorialStep = 'one-side-demo';
-                byId('control-help').textContent = 'Right-side muscles are engaged. Watch one shoulder rise ahead of the other.';
+                byId('control-help').textContent = 'Right side · Watch the shoulders.';
             }
         }
-        if (pullupTutorialStep !== 'explain') {
+        if (!isTutorialPaused()) {
             for (let i = 0; i < 2; i++) applyPhysics(state, TASK.torque(state, activation), TASK.config, delta / 2);
+        }
+        if (activeLevel === 'curl' && curlTutorialStep === 'biceps-only' && state.flex >= 1.05) {
+            curlTutorialStep = 'explain-solo';
+            releaseAllControls();
+            showTutorialPause('Pause · Biceps alone', 'In this game’s simplified model, Q moves the curl partway. Continue, then release Q and watch gravity lower the arm.', now);
+        }
+        if (activeLevel === 'curl' && curlTutorialStep === 'solo-return' && state.flex <= .25) {
+            curlTutorialStep = 'explain-combine';
+            showTutorialPause('Pause · Add elbow flexors', 'Now combine Q with W or E. The biceps, brachialis, and brachioradialis can move the curl to the top checkpoint.', now);
         }
         if (activeLevel === 'pullup' && pullupTutorialStep === 'one-side-demo' && state.pull >= .42) {
             pullupTutorialStep = 'explain';
             releaseAllControls();
-            byId('control-help').textContent = 'Paused tutorial: the controls are mirrored. The other side has matching lat and elbow-flexor controls.';
-            byId('level-tutorial-copy').textContent = 'Only one side was active, so your shoulders moved unevenly. The controls are mirrored: A + S on the left match K + L on the right. To complete the Pull-Up, coordinate both sides together and keep the torso level.';
-            byId('level-tutorial').hidden = false;
+            byId('control-help').textContent = 'Paused · Controls mirror left/right.';
+            showTutorialPause('Pause · Both sides together', 'One side moved first. A + S mirror K + L. Continue, then use both sides together and keep your shoulders level.', now);
         }
-        if (startedAt !== null) {
+        if (startedAt !== null && !isTutorialPaused()) {
             byId('t').textContent = ((now - startedAt) / 1000).toFixed(1);
             const valid = TASK.stages[stage].isDone(state);
             if (valid) {
                 if (phaseStartedAt === null) {
                     phaseStartedAt = now;
                     holdingTarget = true;
-                    byId('hold-status').textContent = 'Checkpoint reached. Hold steady inside the target ring for 0.5 seconds.';
+                    byId('hold-status').textContent = 'In ring · hold steady';
                 }
                 const elapsed = (now - phaseStartedAt) / 1000;
                 byId('stepclock').textContent = Math.min(.5, elapsed).toFixed(1);
@@ -1169,14 +1229,14 @@ function frame(now) {
                     } else {
                         byId('stepclock').textContent = '0.0';
                         setHoldProgress(0);
-                        byId('hold-status').textContent = `Checkpoint ${completedCheckpoints} complete. Next: ${TASK.stages[stage].text}. Reach the target and hold for 0.5 seconds.`;
+                        byId('hold-status').textContent = `Checkpoint ${completedCheckpoints} · ${TASK.stages[stage].text}`;
                     }
                 }
             } else {
                 if (holdingTarget) {
                     byId('hold-status').textContent = TASK.holdHint
-                        ? 'Hold reset: both shoulder markers must stay inside their rings together, with your torso level.'
-                        : 'Hold reset: your position left the target ring. Return to the ring to restart the 0.5-second hold.';
+                        ? 'Hold reset · return both shoulders to the rings.'
+                        : 'Hold reset · return to the ring.';
                 }
                 holdingTarget = false;
                 phaseStartedAt = null;
@@ -1189,12 +1249,24 @@ function frame(now) {
     const phaseIndex = Math.min(stage, TASK.stages.length - 1);
     if (completed) {
         byId('goal').textContent = '';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'choose-biceps') {
+        byId('goal').textContent = 'Tutorial · Press Q only.';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'biceps-only') {
+        byId('goal').textContent = 'Tutorial · Watch the curl.';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'solo-return') {
+        byId('goal').textContent = 'Tutorial · Release Q.';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'explain-solo') {
+        byId('goal').textContent = 'Paused · Biceps alone';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'explain-combine') {
+        byId('goal').textContent = 'Paused · Combine flexors';
+    } else if (activeLevel === 'curl' && curlTutorialStep === 'full-practice') {
+        byId('goal').textContent = `Step ${Math.min(stage + 1, TASK.stages.length)} of ${TASK.stages.length} · ${TASK.stages[phaseIndex].text}`;
     } else if (activeLevel === 'pullup' && pullupTutorialStep === 'choose-side') {
-        byId('goal').textContent = 'Tutorial · Start with one side only.';
+        byId('goal').textContent = 'Tutorial · Choose one side.';
     } else if (activeLevel === 'pullup' && pullupTutorialStep === 'one-side-demo') {
-        byId('goal').textContent = 'Tutorial · Notice how one-sided effort tilts the shoulders.';
+        byId('goal').textContent = 'Tutorial · Watch the shoulders.';
     } else if (activeLevel === 'pullup' && pullupTutorialStep === 'explain') {
-        byId('goal').textContent = 'Tutorial paused · Continue when you are ready to coordinate both sides.';
+        byId('goal').textContent = 'Paused · Both sides together';
     } else {
         byId('goal').textContent = `Step ${Math.min(stage + 1, TASK.stages.length)} of ${TASK.stages.length} · ${TASK.stages[phaseIndex].text}`;
     }
